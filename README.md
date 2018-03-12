@@ -6,14 +6,16 @@ Add the string "daytimesendoutsidetovm=yes" to the description of users this sho
 
 Modified extensions_override_freepbx.conf:
 
-```[from-did-direct]
+```
+[from-did-direct]
 include => from-did-direct-custom
 include => ext-findmefollow
 include => ext-local
 ```
 Added to extensions_custom.conf:
 
-```[from-did-direct-custom]
+```
+[from-did-direct-custom]
 exten => _XXXX,1,AGI(daytimeredirect.agi)
 exten => _XXXX,n,NOOP(Forward state is ${FORWARDTOVM})
 exten => _XXXX,n,GotoIf($["${FORWARDTOVM}" = "1"]?ForwardVM)
