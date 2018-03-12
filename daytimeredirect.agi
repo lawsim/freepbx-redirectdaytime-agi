@@ -1,0 +1,67 @@
+#!/usr/bin/env php
+<?php
+	// configure values
+	set_time_limit(4);
+	date_default_timezone_set("America/Los_Angeles");
+	// connect DB
+	$db = 'asterisk';
+	$dbuser = 'fpbxread(YOURUSER)';
+	$dbpass = 'YOURPASS';
+	$dbhost = 'localhost';
+	
+	$hours_greater_than =6;
+	$hours_less_than =15;
+	
+	require('phpagi.php');
+
+	$AGI = new AGI();
+	
+	// get extension
+	$callingnum = $AGI->request['agi_callerid'];
+	$ext = $AGI->request['agi_extension'];
+
+	debug("Starting New daytimeredirect.agi", 1);
+	debug("Caller " . $callingnum . " called " . $ext . " at hour " . date('H'), 1);
+	
+	// check if call is outside and time is between 7:00 and 3:00
+	if(strlen($callingnum) > 4
+		&& date('H') >= $hours_greater_than &&  date('H') < $hours_less_than)
+	{
+		debug($callingnum . " is longer than 4", 1);
+		
+		mysql_connect($dbhost,$dbuser,$dbpass);
+		mysql_select_db("$db"); //or die("could not open database");
+		
+		
+		// lookup ext
+		$row=mysql_query("select description from userman_users where username='" . $ext . "' AND description LIKE '%daytimesendoutsidetovm=yes%' LIMIT 1");
+		
+		if(mysql_num_rows($row) >= 1)
+		{
+			debug("FORWARDTOVM is set to 1", 1);
+			$AGI->set_variable("FORWARDTOVM", "1");
+		}
+		else
+		{
+			$AGI->set_variable("FORWARDTOVM", "0");
+		}
+	}
+
+	exit(0);
+
+	// helper funcs
+	function get_var( $agi, $value) {
+		$r = $agi->get_variable( $value );
+
+		if ($r['result'] == 1) {
+			$result = $r['data'];
+			return $result;
+		}
+		return '';
+	}
+
+	function debug($string, $level=3) {
+		global $AGI;
+		$AGI->verbose($string, $level);
+	}
+?>
