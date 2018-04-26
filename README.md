@@ -18,9 +18,13 @@ Added to extensions_custom.conf:
 [from-did-direct-custom]
 exten => _XXXX,1,AGI(daytimeredirect.agi)
 exten => _XXXX,n,NOOP(Forward state is ${FORWARDTOVM})
-exten => _XXXX,n,GotoIf($["${FORWARDTOVM}" = "1"]?ForwardVM)
-exten => _XXXX,n,Dial(Local/${EXTEN}@ext-local)
-exten => _XXXX,n(ForwardVM),Voicemail(${EXTEN})
+exten => _XXXX,n,GotoIf($["${FORWARDTOVM}" != "1"]?SkipForwardVM)
+exten => _XXXX,n(ForwardVM),Voicemail(${EXTEN},u)
+exten => _XXXX,n(SkipForwardVM),Goto(from-did-direct-continue,${EXTEN},1)
+
+[from-did-direct-continue]
+include => ext-findmefollow
+include => ext-local
 ```
 
 Wrote/placed this agi script into the AGI bin dir (/var/lib/asterisk/agi-bin).  Make sure you have unix line endings.
