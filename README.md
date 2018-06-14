@@ -20,6 +20,7 @@ exten => _XXXX,1,AGI(daytimeredirect.agi)
 exten => _XXXX,n,NOOP(Forward state is ${FORWARDTOVM})
 exten => _XXXX,n,GotoIf($["${FORWARDTOVM}" != "1"]?SkipForwardVM)
 exten => _XXXX,n(ForwardVM),Voicemail(${EXTEN},u)
+exten => _XXXX,n,Macro(hangupcall,)
 exten => _XXXX,n(SkipForwardVM),Goto(from-did-direct-continue,${EXTEN},1)
 
 [from-did-direct-continue]
